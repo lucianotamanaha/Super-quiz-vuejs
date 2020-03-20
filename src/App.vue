@@ -1,60 +1,83 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest teste</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
+    <v-app-bar app>
+      <app-header></app-header>
     </v-app-bar>
-
     <v-content>
-      <HelloWorld/>
+      <v-container fluid>
+        <transition name="flip" mode="out-in">
+          <component :is="mode" @answered="answered($event)" @confirmed="mode = 'Question'"></component>
+        </transition>
+        <v-snackbar v-model="snackbar" multi-line>
+          {{ error }}
+          <v-btn color="red" text @click="snackbar = false">Close</v-btn>
+        </v-snackbar>
+      </v-container>
     </v-content>
+    <v-footer>
+      <app-footer></app-footer>
+    </v-footer>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
+import AppHeader from "./components/Shared/Header";
+import AppFooter from "./components/Shared/Footer";
+import Question from "./components/Question";
+import Answer from "./components/Answer";
 
 export default {
-  name: 'App',
-
   components: {
-    HelloWorld,
+    AppHeader,
+    AppFooter,
+    Question,
+    Answer
   },
-
-  data: () => ({
-    //
-  }),
+  data() {
+    return {
+      mode: "Question",
+      error: "Wrong, try again!",
+      snackbar: false
+    };
+  },
+  methods: {
+    answered(isCorrect) {
+      this.snackbar = false;
+      if (isCorrect) {
+        this.mode = "Answer";
+      } else {
+        this.mode = "Question";
+        this.snackbar = true;
+      }
+    }
+  }
 };
 </script>
+
+<style scoped>
+.flip-enter-active {
+  animation: flip-in 0.5s ease-out forwards;
+}
+
+.flip-leave-active {
+  animation: flip-out 0.5s ease-out forwards;
+}
+
+@keyframes flip-out {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(90deg);
+  }
+}
+
+@keyframes flip-in {
+  from {
+    transform: rotateY(90deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+</style>
